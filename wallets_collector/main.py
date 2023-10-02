@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 import os
 import json
@@ -74,7 +75,7 @@ def getAllWallets(file):
         return wallets
 
 
-def processWallet(parentFolder, wallet):
+def processWallet(parentFolder, wallet, pbar):
 
     url = "https://index.multiversx.com/transactions/_search?scroll=1m&size=10000"
     query = {"query": {"bool": {"should": [{"match": {e: wallet}} for e in [
@@ -131,32 +132,44 @@ def processWallet(parentFolder, wallet):
     with open(os.path.join(parentFolder, wallet+".json"), "w") as f:
         json.dump(data, f, ensure_ascii=False)
 
+    pbar.update(1)
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-l", "--list", help="The wallets list",
-                        type=str, default=r"lists\all_wallets.txt")
-    args = parser.parse_args()
-    pbar = tqdm(unit=" account")
+
+async def main(walletsFile):
 
     timestamp = str(int(
         datetime.timestamp(datetime.now())))
     parentFolder = os.path.join(WALLETS_FOLDER, timestamp)
 
     os.makedirs(parentFolder, exist_ok=True)
-    wallets = getAllWallets(args.list)
+    wallets = getAllWallets(walletsFile)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
 
-        futures = []
+        loop = asyncio.get_event_loop()
+        pbar = tqdm(unit=" account")
 
-        for wallet in wallets:
-            futures.append(executor.submit(
-                processWallet, parentFolder, wallet))
+        tasks = [
+            loop.run_in_executor(
+                executor,
+                processWallet,
+                *(parentFolder, wallet, pbar)
+            )
+            for wallet in wallets
+        ]
+        for _ in await asyncio.gather(*tasks):
+            pass
 
-        for __ in concurrent.futures.as_completed(futures):
-            pbar.update()
+        pbar.close()
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-l", "--list", help="The wallets list",
+                        type=str, default=r"lists\all_wallets.txt")
+    args = parser.parse_args()
+
+    loop = asyncio.get_event_loop()
+    main_task = asyncio.ensure_future(main(args.list))
+
+    loop.run_until_complete(main_task)
