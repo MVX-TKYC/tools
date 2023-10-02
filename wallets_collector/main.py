@@ -3,17 +3,6 @@ import json
 import time
 import requests
 
-# Overriding the built-in print function to include timestamps
-original_print = print
-
-
-def new_print(*args, **kwargs):
-    # Add a timestamp to each print call
-    original_print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}]", *args, **kwargs)
-
-
-print = new_print
-
 # Create a 'wallets' directory if it does not exist
 os.makedirs("wallets", exist_ok=True)
 
@@ -37,7 +26,6 @@ def get_request_content_scroll(url, query):
         print(f"Too much transactions ? ({total_data})")
         return
     else:
-        print(f"Total: {total_data}")
         scroll_id = data["_scroll_id"]
         all_data = data["hits"]["hits"]
 
@@ -48,7 +36,6 @@ def get_request_content_scroll(url, query):
                 "https://index.multiversx.com/_search/scroll", query)
             scroll_id = data["_scroll_id"]
             all_data += data["hits"]["hits"]
-            print(f"Current: {len(all_data)}")
         return all_data
 
 
@@ -60,7 +47,6 @@ accounts = [e["_id"] for e in get_request_content(url, query)["hits"]["hits"]]
 
 # Loop over each account and fetch the related transactions, smart contract results, and logs
 for i, wallet in enumerate(accounts):
-    print(i+1, wallet)
 
     url = "https://index.multiversx.com/transactions/_search?scroll=1m&size=10000"
     query = {"query": {"bool": {"should": [{"match": {e: wallet}} for e in [
@@ -101,8 +87,6 @@ for i, wallet in enumerate(accounts):
             logs_dict[tx] = [log]
         else:
             logs_dict[tx] += [log]
-
-    print(len(data), len(scresults), len(logs))
 
     # Attach the corresponding smart contract results and logs to each transaction
     for i, transaction in enumerate(data):
