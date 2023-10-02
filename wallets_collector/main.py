@@ -1,9 +1,9 @@
 import os
 import json
+import random
 import requests
 import argparse
 from tqdm import tqdm
-from concurrent.futures import ThreadPoolExecutor
 import concurrent.futures
 
 WALLETS_FOLDER = "wallets"
@@ -54,6 +54,7 @@ def getAllWallets(file):
         ignoredAccounts = getFilesWithoutExtension(WALLETS_FOLDER)
 
         accounts = accountsFile.read().splitlines()
+        random.shuffle(accounts)
 
         print("Found {0}/{1} ({2}%) accounts already processed.".format(
             len(ignoredAccounts), len(accounts), round(len(ignoredAccounts) / len(accounts) * 100)))
@@ -132,14 +133,14 @@ def main():
     args = parser.parse_args()
     pbar = tqdm(unit=" account")
 
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
 
         futures = []
 
         for wallet in getAllWallets(args.list):
             futures.append(executor.submit(processWallet, wallet))
 
-        for future in tqdm(concurrent.futures.as_completed(futures)):
+        for future in concurrent.futures.as_completed(futures):
             pbar.update()
 
 
