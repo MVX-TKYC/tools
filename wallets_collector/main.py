@@ -16,7 +16,11 @@ def get_request_content(url, query):
 
     # Send a POST request to the provided URL with the given query
     # Return the JSON content of the response
-    return requests.post(url, headers=headers, data=json.dumps(query)).json()
+    response = requests.post(url, headers=headers, data=json.dumps(query))
+
+    response.raise_for_status()
+
+    return response.json()
 
 
 def get_request_content_scroll(url, query):
@@ -50,7 +54,7 @@ def getAllWallets(file):
 
         for _, _, files in os.walk(WALLETS_FOLDER):
             for file in files:
-                filename = os.path.splittext(file)[0]
+                filename = os.path.splitext(file)[0]
                 ignoredWallets.append(filename)
 
         return ignoredWallets
@@ -78,7 +82,7 @@ def processWallet(parentFolder, wallet):
     data = get_request_content_scroll(url, query)
 
     if not data:
-        with open(os.path.join(WALLETS_FOLDER, wallet+".txt"), "w") as f:
+        with open(os.path.join(WALLETS_FOLDER, "ignored", wallet+".txt"), "w") as f:
             f.write("ignored")
         return
 
@@ -140,12 +144,13 @@ def main():
     parentFolder = os.path.join(WALLETS_FOLDER, timestamp)
 
     os.makedirs(parentFolder, exist_ok=True)
+    wallets = getAllWallets(args.list)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
 
         futures = []
 
-        for wallet in getAllWallets(args.list):
+        for wallet in wallets:
             futures.append(executor.submit(
                 processWallet, parentFolder, wallet))
 
