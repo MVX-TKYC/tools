@@ -115,4 +115,4 @@ for i, wallet in enumerate(accounts):
 
     # Save the fetched and combined data for each wallet to a separate JSON file
     with open(f"wallets/{wallet}.json", "w") as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
+        json.dump(data, f, ensure_ascii=False)
