@@ -1,6 +1,6 @@
 # What is it ?
 
-Get all the transactions for each wallet in the MVX blockchain
+Query every transactions for each wallet and store them in /wallets folder
 
 # How to use 
 
