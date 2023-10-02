@@ -7,11 +7,18 @@ import requests
 import argparse
 from tqdm import tqdm
 import concurrent.futures
+from ratelimit import limits, sleep_and_retry
 
 WALLETS_FOLDER = "wallets"
 MAX_WORKERS = min(32, os.cpu_count() + 4)
 
+# 10 calls per seconds
+CALLS = 5
+PERIOD = .5
 
+
+@sleep_and_retry
+@limits(calls=CALLS, period=PERIOD)
 def get_request_content(url, query):
     headers = {"Content-Type": "application/json"}
 
