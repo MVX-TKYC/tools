@@ -54,7 +54,7 @@ def get_request_content_scroll(url, query):
     return all_data
 
 
-def getAllWallets(file):
+def getAllWallets(file, shuffle):
     tqdm.write(f"Reading {file}")
 
     def getIgnoredWallets():
@@ -71,7 +71,10 @@ def getAllWallets(file):
         ignoredWallets = getIgnoredWallets()
 
         wallets = accountsFile.read().splitlines()
-        random.shuffle(wallets)
+
+        if shuffle is True:
+            random.shuffle(wallets)
+            print("Shuffling wallets")
 
         print("Found {0}/{1} ({2}%) wallets already processed.".format(
             len(ignoredWallets), len(wallets), round(len(ignoredWallets) / len(wallets) * 100)))
@@ -142,14 +145,14 @@ def processWallet(parentFolder, wallet, pbar):
     pbar.update(1)
 
 
-async def main(walletsFile):
+async def main(walletsFile, shuffle):
 
     timestamp = str(int(
         datetime.timestamp(datetime.now())))
     parentFolder = os.path.join(WALLETS_FOLDER, timestamp)
 
     os.makedirs(parentFolder, exist_ok=True)
-    wallets = getAllWallets(walletsFile)
+    wallets = getAllWallets(walletsFile, shuffle)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
 
@@ -174,9 +177,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-l", "--list", help="The wallets list",
                         type=str, default=r"lists\all_wallets.txt")
+    parser.add_argument("-s", "--shuffle", type=bool)
     args = parser.parse_args()
 
     loop = asyncio.get_event_loop()
-    main_task = asyncio.ensure_future(main(args.list))
+    main_task = asyncio.ensure_future(main(args.list, args.shuffle))
 
     loop.run_until_complete(main_task)
