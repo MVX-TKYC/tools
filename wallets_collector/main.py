@@ -140,7 +140,7 @@ def main():
         for wallet in getAllWallets(args.list):
             futures.append(executor.submit(processWallet, wallet))
 
-        for future in concurrent.futures.as_completed(futures):
+        for __ in concurrent.futures.as_completed(futures):
             pbar.update()
 
 
