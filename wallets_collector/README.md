@@ -1,4 +1,4 @@
-# What is it ?
+# What is it?
 
 Query every transactions for each wallet and store them in /wallets folder
 
