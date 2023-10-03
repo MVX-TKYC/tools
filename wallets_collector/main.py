@@ -10,7 +10,6 @@ import concurrent.futures
 from ratelimit import limits, sleep_and_retry
 
 WALLETS_FOLDER = "wallets"
-MAX_WORKERS = min(32, os.cpu_count() + 4)
 
 # 10 calls per seconds
 CALLS = 5
@@ -146,7 +145,7 @@ def processWallet(parentFolder, wallet, pbar):
     pbar.update(1)
 
 
-async def main(walletsFile, shuffle):
+async def main(walletsFile, shuffle, workersCount):
 
     timestamp = str(int(
         datetime.timestamp(datetime.now())))
@@ -155,9 +154,9 @@ async def main(walletsFile, shuffle):
     os.makedirs(parentFolder, exist_ok=True)
     wallets = getAllWallets(walletsFile, shuffle)
 
-    print(f"Using {MAX_WORKERS} workers.")
+    print(f"Using {workersCount} workers.")
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workersCount) as executor:
 
         loop = asyncio.get_event_loop()
         pbar = tqdm(unit=" account")
@@ -180,10 +179,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-l", "--list", help="The wallets list",
                         type=str, default=r"lists\all_wallets.txt")
-    parser.add_argument("-s", "--shuffle", type=bool)
+    parser.add_argument("-s", "--shuffle", type=bool, default=False)
+    parser.add_argument("-w", "--workers", type=int, default=4)
     args = parser.parse_args()
 
     loop = asyncio.get_event_loop()
-    main_task = asyncio.ensure_future(main(args.list, args.shuffle))
+    main_task = asyncio.ensure_future(
+        main(args.list, args.shuffle, args.workers))
 
     loop.run_until_complete(main_task)
