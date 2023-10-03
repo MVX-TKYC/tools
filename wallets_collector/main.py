@@ -11,13 +11,7 @@ from ratelimit import limits, sleep_and_retry
 
 WALLETS_FOLDER = "wallets"
 
-# 10 calls per seconds
-CALLS = 5
-PERIOD = .5
 
-
-@sleep_and_retry
-@limits(calls=CALLS, period=PERIOD)
 def get_request_content(url, query):
     headers = {"Content-Type": "application/json"}
 
