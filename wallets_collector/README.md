@@ -9,3 +9,9 @@ Create a txt containing all your wallets, then run
 ```
 py main.py path_to_txt
 ```
+
+## Parameters
+
+### --shufle (-s)
+
+Shuffle the wallets order from txt list
