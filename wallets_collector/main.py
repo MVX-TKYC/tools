@@ -41,6 +41,8 @@ def get_request_content_scroll(url, query):
         tqdm.write(f"Too much transactions ? ({total_data})")
         return
     else:
+        tqdm.write(f"Fetching {total_data} transactions.")
+
         scroll_id = data["_scroll_id"]
         all_data = data["hits"]["hits"]
 
