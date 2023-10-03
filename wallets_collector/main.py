@@ -79,8 +79,7 @@ def getAllWallets(file, shuffle):
         print("Found {0}/{1} ({2}%) wallets already processed.".format(
             len(ignoredWallets), len(wallets), round(len(ignoredWallets) / len(wallets) * 100)))
 
-        wallets = filter(lambda a: not a.startswith(
-            "erd1qqq") and not a in ignoredWallets, wallets)
+        wallets = filter(lambda a: not a in ignoredWallets, wallets)
 
         return wallets
 
