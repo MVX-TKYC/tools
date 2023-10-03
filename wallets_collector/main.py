@@ -93,7 +93,7 @@ def processWallet(parentFolder, wallet, pbar):
     data = get_request_content_scroll(url, query)
 
     if not data:
-        with open(os.path.join(WALLETS_FOLDER, "ignored", wallet+".txt"), "w") as f:
+        with open(os.path.join(parentFolder, wallet+".txt"), "w") as f:
             f.write("ignored")
         return
 
@@ -153,6 +153,8 @@ async def main(walletsFile, shuffle):
 
     os.makedirs(parentFolder, exist_ok=True)
     wallets = getAllWallets(walletsFile, shuffle)
+
+    print(f"Using {MAX_WORKERS} workers.")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
 
