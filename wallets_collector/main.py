@@ -139,11 +139,9 @@ def processWallet(parentFolder, wallet, pbar):
     pbar.update(1)
 
 
-async def main(walletsFile, shuffle, workersCount):
+async def main(walletsFile, shuffle, workersCount, outputFolder):
 
-    timestamp = str(int(
-        datetime.timestamp(datetime.now())))
-    parentFolder = os.path.join(WALLETS_FOLDER, timestamp)
+    parentFolder = os.path.join(WALLETS_FOLDER, outputFolder)
 
     os.makedirs(parentFolder, exist_ok=True)
     wallets = getAllWallets(walletsFile, shuffle)
@@ -174,11 +172,13 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--list", help="The wallets list",
                         type=str, default=r"lists\all_wallets.txt")
     parser.add_argument("-s", "--shuffle", type=bool, default=False)
-    parser.add_argument("-w", "--workers", type=int, default=4)
+    parser.add_argument("-w", "--workers", type=int, default=16)
+    parser.add_argument("-o", "--output", type=str, default=str(int(
+        datetime.timestamp(datetime.now()))))
     args = parser.parse_args()
 
     loop = asyncio.get_event_loop()
     main_task = asyncio.ensure_future(
-        main(args.list, args.shuffle, args.workers))
+        main(args.list, args.shuffle, args.workers, args.output))
 
     loop.run_until_complete(main_task)
