@@ -145,14 +145,14 @@ async def main(walletsFile, shuffle, workersCount, outputFolder):
     parentFolder = os.path.join(WALLETS_FOLDER, outputFolder)
 
     os.makedirs(parentFolder, exist_ok=True)
-    (wallets, remainingWallets) = getRemainingWallets(walletsFile, shuffle)
+    (wallets, remainingWalletsCount) = getRemainingWallets(walletsFile, shuffle)
 
     print(f"Using {workersCount} workers.")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=workersCount) as executor:
 
         loop = asyncio.get_event_loop()
-        pbar = tqdm(total=remainingWallets, unit=" account")
+        pbar = tqdm(total=remainingWalletsCount, unit=" account")
 
         tasks = [
             loop.run_in_executor(
