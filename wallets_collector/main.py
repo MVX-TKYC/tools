@@ -49,7 +49,7 @@ def get_request_content_scroll(url, query):
     return all_data
 
 
-def getAllWallets(file, shuffle):
+def getRemainingWallets(file, shuffle):
     tqdm.write(f"Reading {file}")
 
     def getIgnoredWallets():
@@ -65,18 +65,19 @@ def getAllWallets(file, shuffle):
     with open(file, "r") as accountsFile:
         ignoredWallets = getIgnoredWallets()
 
-        wallets = accountsFile.read().splitlines()
+        allWallets = accountsFile.read().splitlines()
 
         if shuffle is True:
-            random.shuffle(wallets)
+            random.shuffle(allWallets)
             print("Shuffling wallets")
 
         print("Found {0}/{1} ({2}%) wallets already processed.".format(
-            len(ignoredWallets), len(wallets), round(len(ignoredWallets) / len(wallets) * 100)))
+            len(ignoredWallets), len(allWallets), round(len(ignoredWallets) / len(allWallets) * 100)))
 
-        wallets = filter(lambda a: not a in ignoredWallets, wallets)
+        remainingWallets = filter(
+            lambda a: not a in ignoredWallets, allWallets)
 
-        return wallets
+        return remainingWallets, len(allWallets) - len(ignoredWallets)
 
 
 def processWallet(parentFolder, wallet, pbar):
@@ -144,14 +145,14 @@ async def main(walletsFile, shuffle, workersCount, outputFolder):
     parentFolder = os.path.join(WALLETS_FOLDER, outputFolder)
 
     os.makedirs(parentFolder, exist_ok=True)
-    wallets = getAllWallets(walletsFile, shuffle)
+    (wallets, remainingWallets) = getRemainingWallets(walletsFile, shuffle)
 
     print(f"Using {workersCount} workers.")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=workersCount) as executor:
 
         loop = asyncio.get_event_loop()
-        pbar = tqdm(unit=" account")
+        pbar = tqdm(total=remainingWallets, unit=" account")
 
         tasks = [
             loop.run_in_executor(
