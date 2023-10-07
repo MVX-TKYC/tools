@@ -34,8 +34,6 @@ def get_request_content_scroll(url, query):
         tqdm.write(f"Too much transactions ? ({total_data})")
         return
     else:
-        tqdm.write(f"Fetching {total_data} transactions.")
-
         scroll_id = data["_scroll_id"]
         all_data = data["hits"]["hits"]
 
@@ -103,12 +101,14 @@ def processWallet(parentFolder, wallet, pbar):
     scresults = get_request_content_scroll(url, query)
 
     scresults_dict = {}
-    for scresult in scresults:
-        tx = scresult["_source"]["originalTxHash"]
-        if tx not in scresults_dict:
-            scresults_dict[tx] = [scresult]
-        else:
-            scresults_dict[tx] += [scresult]
+
+    if scresult is not None:
+        for scresult in scresults:
+            tx = scresult["_source"]["originalTxHash"]
+            if tx not in scresults_dict:
+                scresults_dict[tx] = [scresult]
+            else:
+                scresults_dict[tx] += [scresult]
 
     # Get all logs related to the filtered transactions
     url = "https://index.multiversx.com/logs/_search?scroll=1m&size=10000"
@@ -135,6 +135,7 @@ def processWallet(parentFolder, wallet, pbar):
 
     # Save the fetched and combined data for each wallet to a separate JSON file
     with open(os.path.join(parentFolder, wallet+".json"), "w") as f:
+        print("Writing " + wallet + ".json")
         json.dump(data, f, ensure_ascii=False)
 
     pbar.update(1)
