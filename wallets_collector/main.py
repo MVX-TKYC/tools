@@ -102,13 +102,12 @@ def processWallet(parentFolder, wallet, pbar):
 
     scresults_dict = {}
 
-    if scresult is not None:
-        for scresult in scresults:
-            tx = scresult["_source"]["originalTxHash"]
-            if tx not in scresults_dict:
-                scresults_dict[tx] = [scresult]
-            else:
-                scresults_dict[tx] += [scresult]
+    for scresult in scresults:
+        tx = scresult["_source"]["originalTxHash"]
+        if tx not in scresults_dict:
+            scresults_dict[tx] = [scresult]
+        else:
+            scresults_dict[tx] += [scresult]
 
     # Get all logs related to the filtered transactions
     url = "https://index.multiversx.com/logs/_search?scroll=1m&size=10000"
