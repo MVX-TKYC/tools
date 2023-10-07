@@ -20,10 +20,14 @@ def main():
     for filename in tqdm(os.listdir(folder_path)):
         if filename.endswith('.json'):
             file_path = os.path.join(folder_path, filename)
-            with open(file_path, 'r') as file:
-                json_data = file.read()
-                if not is_valid_json(json_data):
-                    print(f"Invalid JSON in file: {file_path}")
+
+            file = open(file_path, 'r')
+            json_data = file.read()
+            file.close()
+
+            if not is_valid_json(json_data):
+                os.remove(file_path)
+                tqdm.write(f"Invalid JSON removed: {file_path}")
 
 
 if __name__ == "__main__":
