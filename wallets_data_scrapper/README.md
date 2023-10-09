@@ -1,4 +1,4 @@
-# Wallets Data Scraper Readme
+# Wallets Data Scrapper Readme
 
 ## Overview
 
