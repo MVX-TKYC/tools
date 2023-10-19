@@ -4,6 +4,7 @@
 
 This Python script is designed for scraping data related to cryptocurrency wallets from the MultiversX blockchain. It fetches transaction data, smart contract results, and logs for a list of wallets, saving the collected data in separate JSON files. The script also allows you to specify various parameters for customization.
 
+
 ## Prerequisites
 
 Before using this script, make sure you have the following dependencies installed:
@@ -64,6 +65,12 @@ The script will create an output folder inside the "wallets" directory (e.g., "w
 - Be aware of rate limits and adjust the number of workers accordingly to avoid overloading the API.
 
 - The script may take some time to complete, depending on the number of wallets in your list and the size of the blockchain data.
+
+## Development Choices
+
+- Getting data as fast as possible: The faster we get the data, the faster we can train the IA. So we choose to ignore wallets with less than 50 transactions
+- Scraping method: Instead of API, we used Elastic Search which has no rate limit.
+
 
 ## Contributing
 
